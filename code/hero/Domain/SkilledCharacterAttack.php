@@ -21,7 +21,7 @@ class SkilledCharacterAttack extends CharacterAttack
     /**
      * @throws Exception
      */
-    public function applySkills(Fight $fight, int &$damage): void
+    private function applySkills(Fight $fight, int &$damage): void
     {
         foreach ($fight->getAttacker()->getAttackingSkills() as $skill) {
             if ($skill->canApply()) {

@@ -30,7 +30,7 @@ class SkilledCharacterDefend extends CharacterDefend
      * @param int $damage
      * @throws Exception
      */
-    public function applySkills(Fight $fight, int &$damage): void
+    private function applySkills(Fight $fight, int &$damage): void
     {
         foreach ($fight->getDefender()->getDefendingSkills() as $skill) {
             if ($skill->canApply()) {

@@ -18,18 +18,4 @@ class CharacterAttack implements CharacterAttackInterface
         $fight->setAppliedDamage($damage);
         $fight->setDamage($damage);
     }
-
-    /**
-     * @throws Exception
-     */
-    public function applySkills(Fight $fight, int &$damage): void
-    {
-        foreach ($fight->getAttacker()->getAttackingSkills() as $skill) {
-            if ($skill->canApply()) {
-                $skill->apply($damage);
-                $fight->addAttackerAppliedSkill($skill);
-                return;
-            }
-        }
-    }
 }
