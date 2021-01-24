@@ -15,15 +15,21 @@ class BattleEndTest extends TestCase
      */
     public function testBattleEndsAfterANumberOfSteps(): void
     {
-        $numberOfSteps = 10;
-        $attacker = CharacterFactory::createCharacter();
-        $defender = CharacterFactory::createCharacter();
+        $attacker = CharacterFactory::createCharacter([
+            'strength' => 10,
+            'damage' => 50,
+        ]);
 
-        $battle = $this->createPartialMock(Battle::class, ['fight']);
-        $battle->expects(self::exactly(10))
-            ->method('fight');
+        $defender = CharacterFactory::createCharacter([
+            'strength' => 10,
+            'damage' => 50,
+        ]);
 
-        $battle->battle($attacker, $defender, $numberOfSteps);
+        $battle = new Battle();
+
+        $fights = $battle->battle($attacker, $defender, 20);
+
+        self::assertCount(20, $fights);
     }
 
     /**
@@ -40,12 +46,10 @@ class BattleEndTest extends TestCase
             'health' => 20,
         ]);
 
-        $battle  = $this->createPartialMock(Battle::class, ['applySkills']);
-        $battle->expects(self::exactly(4))
-            ->method('applySkills')
-            ->willReturn(null);
+        $battle = new Battle();
 
-        $battle->battle($attacker, $defender, 20);
-        self::assertEquals(0, $defender->getHealth());
+        $fights = $battle->battle($attacker, $defender, 20);
+
+        self::assertNotCount(20, $fights);
     }
 }

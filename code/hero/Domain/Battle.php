@@ -3,38 +3,32 @@ declare(strict_types=1);
 
 namespace Hero\Domain;
 
-use Hero\Domain\Skill\Skill;
 use Exception;
-use stdClass;
+use function DeepCopy\deep_copy;
 
 class Battle
 {
     /**
      * @throws Exception
      */
-    public function battle(Character $attacker, Character $defender, $numberOfSteps): stdClass
+    public function battle(Character $character1, Character $character2, $numberOfTurns): array
     {
-        $result = new stdClass();
-        $result->characters = [
-            $attacker, $defender
-        ];
+        $attacker = $this->getStartingCharacter($character1, $character2);
+        $defender = $character1 === $attacker ? $character2 : $character1;
+        $fights = [];
 
-        $result->stepsNumber = $numberOfSteps;
-        $result->startingCharacter = $attacker;
-        $result->steps = [];
+        for ($turn = 1;  $turn <= $numberOfTurns; $turn++) {
+            $fight = $this->fight($attacker, $defender);
+            $fight->setTurn($turn);
 
-
-        $stepIndex = 1;
-        while(!$this->hasEnded($numberOfSteps, $stepIndex, $defender->getHealth())){
-            $stepIndex++;
-
-            $fightResult = $this->fight($attacker, $defender);
-            $fightResult->step = $stepIndex;
-            $result->steps[] = $fightResult;
+            $fights[] = deep_copy($fight);
+            if ($defender->getHealth() < 1) {
+                break;
+            }
+            list($attacker, $defender) = $this->switchCharacters($attacker, $defender);
         }
 
-        return $result;
-
+        return $fights;
     }
 
     public function getStartingCharacter(Character $character1, Character $character2): Character
@@ -53,46 +47,27 @@ class Battle
     /**
      * @throws Exception
      */
-    public function fight(Character $attacker, Character $defender): stdClass
+    public function fight(Character $attacker, Character $defender): Fight
     {
-        $fightResult = new \stdClass();
-        $fightResult->attacker = $attacker;
-        $fightResult->defender = $defender;
-        $fightResult->damage = 0;
-        $fightResult->defenderWasLucy = false;
-
-        $characterAttack = new CharacterAttack();
-        $result = $characterAttack->apply($attacker, $defender, $fightResult);
+        $fight = new Fight($attacker, $defender);
+        CharacterAttackFactory::create($attacker)->apply($fight);
+        CharacterDefendFactory::create($defender)->apply($fight);
 
 
-        $this->applySkills($defender->getDefendingSkills(), $result->damage, $fightResult);
-
-        $health = $defender->getHealth() - $result->damage;
+        $health = $defender->getHealth() - $fight->getDamage();
         $health = $health > 0 ? $health : 0;
 
         $defender->setHealth($health);
 
-        return $fightResult;
+        return $fight;
     }
 
-    /**
-     * @param Skill[] $skills
-     * @param int $damage
-     * @throws Exception
-     */
-    public function applySkills(array $skills, int &$damage): void
+    public function switchCharacters(Character $attacker, Character $defender): array
     {
-        foreach ($skills as $skill) {
-            if ($skill->canApply()) {
-                $skill->apply($damage);
-                return;
-            }
-        }
-    }
+        $tmp = $attacker;
+        $attacker = $defender;
+        $defender = $tmp;
 
-
-    private function hasEnded(int $numberOfSteps, int $step, int $getHealth): bool
-    {
-        return ($getHealth < 1 || $step > $numberOfSteps);
+        return [$attacker, $defender];
     }
 }

@@ -5,7 +5,6 @@ namespace Tests;
 
 
 use Exception;
-use phpmock\Mock;
 use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\TestCase;
 

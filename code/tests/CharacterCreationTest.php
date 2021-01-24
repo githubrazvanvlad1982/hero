@@ -4,7 +4,6 @@ namespace Tests;
 
 use Exception;
 use Hero\Domain\Character;
-use Hero\Domain\Skill\MagicShieldSkill;
 use Hero\Domain\Skill\RapidStrikeSkill;
 use PHPUnit\Framework\TestCase;
 
@@ -16,6 +15,7 @@ class CharacterCreationTest extends TestCase
     public function testCharacterPropertyAssignment(): void
     {
         $character = new Character(
+            'name',
             70,
             75,
             45,
@@ -23,6 +23,7 @@ class CharacterCreationTest extends TestCase
             10
         );
 
+        self::assertEquals('name', $character->getName());
         self::assertEquals(70, $character->getHealth());
         self::assertEquals(75, $character->getStrength());
         self::assertEquals(45, $character->getDefence());
@@ -33,7 +34,7 @@ class CharacterCreationTest extends TestCase
 
     public function testCharacterSkillsAssignment(): void
     {
-        $character = CharacterFactory::createCharacter();
+        $character = SkilledCharacterFactory::createCharacter();
         $rapidStrikeSkill = new RapidStrikeSkill();
         $character
             ->addSkill($rapidStrikeSkill);

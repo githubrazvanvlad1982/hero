@@ -11,7 +11,6 @@ use Hero\Domain\Skill\RapidStrikeSkill;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-
 class BattleTest extends TestCase
 {
 
@@ -39,7 +38,7 @@ class BattleTest extends TestCase
 
         /** @var Character | MockObject $defender */
         $defender = $this->getMockBuilder(Character::class)
-            ->setConstructorArgs( [70, 75, 45, 40, 10])
+            ->setConstructorArgs( ['name',70, 75, 45, 40, 10])
             ->setMethods(['isLucky'])
             ->getMock();
 
@@ -80,7 +79,7 @@ class BattleTest extends TestCase
             'strength' => 70
         ]);
 
-        $defender = CharacterFactory::createCharacter([
+        $defender = SkilledCharacterFactory::createCharacter([
             'health' => 100,
             'defence' => 50
         ]);

@@ -6,15 +6,14 @@ namespace Hero\Domain;
 
 use Exception;
 
-class CharacterAttack implements CharacterAttackInterface
+class SkilledCharacterAttack extends CharacterAttack
 {
-    /**
-     * @throws Exception
-     */
     public function apply(Fight $fight): void
     {
-        $damage = $fight->getAttacker()->getStrength() - $fight->getDefender()->getDefence();
-        $damage = $damage >= 0 ? $damage : 0;
+        parent::apply($fight);
+        $damage = $fight->getDamage();
+
+        $this->applySkills($fight, $damage);
         $fight->setAppliedDamage($damage);
         $fight->setDamage($damage);
     }

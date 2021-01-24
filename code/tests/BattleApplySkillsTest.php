@@ -18,11 +18,9 @@ class BattleApplySkillsTest extends TestCase
      */
     public function testAttackerAttackingSkillsAreApplied(): void
     {
-        $attacker = CharacterFactory::createCharacter([
-            'strength' => 70
-        ]);
 
-        $defender = CharacterFactory::createCharacter([
+
+        $defender = SkilledCharacterFactory::createCharacter([
             'health' => 100,
             'defence' => 50
         ]);
@@ -34,8 +32,10 @@ class BattleApplySkillsTest extends TestCase
         $magicShieldSkill->method('canApply')->willReturn(true);
 
 
-        $attacker->addSkill($rapidStrikeSkill);
-        $attacker->addSkill($magicShieldSkill);
+        $attacker = SkilledCharacterFactory::createCharacter([
+            'strength' => 70,
+            'skills' => [$rapidStrikeSkill, $magicShieldSkill]
+        ]);
 
         $battle = new Battle();
 
@@ -67,13 +67,8 @@ class BattleApplySkillsTest extends TestCase
      */
     public function testDefenderDefendingSkillsAreApplied(): void
     {
-        $attacker = CharacterFactory::createCharacter([
+        $attacker = SkilledCharacterFactory::createCharacter([
             'strength' => 70
-        ]);
-
-        $defender = CharacterFactory::createCharacter([
-            'health' => 100,
-            'defence' => 50
         ]);
 
         $rapidStrikeSkill = $this->createPartialMock(RapidStrikeSkill::class, ['canApply']);
@@ -82,8 +77,11 @@ class BattleApplySkillsTest extends TestCase
         $magicShieldSkill = $this->createPartialMock(MagicShieldSkill::class, ['canApply']);
         $magicShieldSkill->method('canApply')->willReturn(true);
 
-        $defender->addSkill($rapidStrikeSkill);
-        $defender->addSkill($magicShieldSkill);
+        $defender = SkilledCharacterFactory::createCharacter([
+            'health' => 100,
+            'defence' => 50,
+            'skills' => [$rapidStrikeSkill, $magicShieldSkill]
+        ]);
 
         $battle = new Battle();
 
@@ -122,13 +120,39 @@ class BattleApplySkillsTest extends TestCase
             ->willReturn(true);
 
 
-        $attacker = CharacterFactory::createCharacter();
+        $attacker = SkilledCharacterFactory::createCharacter();
         $attacker->addSkill($skill1);
         $attacker->addSkill($skill2);
         $attacker->addSkill($skill3);
 
         $battle = new Battle();
-        $battle->fight($attacker, CharacterFactory::createCharacter());
+        $battle->fight($attacker, SkilledCharacterFactory::createCharacter());
+    }
+
+    public function testSkilledAreNotAppliedWhenDefenderHasLuck(): void
+    {
+        $attacker = SkilledCharacterFactory::createCharacter([
+            'strength' => 70
+        ]);
+
+        $rapidStrikeSkill = $this->createPartialMock(RapidStrikeSkill::class, ['canApply']);
+        $rapidStrikeSkill->method('canApply')->willReturn(true);
+
+        $magicShieldSkill = $this->createPartialMock(MagicShieldSkill::class, ['canApply']);
+        $magicShieldSkill->method('canApply')->willReturn(true);
+
+        $defender = SkilledCharacterFactory::createCharacter([
+            'health' => 100,
+            'defence' => 50,
+            'skills' => [$rapidStrikeSkill, $magicShieldSkill],
+            'luck' => 100,
+        ]);
+
+        $battle = new Battle();
+        $fight = $battle->fight($attacker, $defender);
+
+        self::assertTrue($fight->getIsLuckyApplied());
+        self::assertCount(0,$fight->getDefenderAppliedSkills());
     }
 
 }
